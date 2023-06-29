@@ -4,6 +4,9 @@ import random
 import ast
 from datetime import datetime
 
+from working_with_files.loan_oop import Loan
+
+
 # Define login function
 def login():
     password = "test"
@@ -26,9 +29,10 @@ def login():
 def reading_data():
     data = open("C:\\Users\\oscar\\OneDrive\\Documents\\100daysofcode\\100daysofcode\\working_with_files\\data_project"
                 "\\customermortgage.csv", "r")
-    loans = []
+    loans = {}
     for line in data.readlines():
-        loans.append(line.split(','))
+        splitted_line = line.split(",")
+        loans[splitted_line[0]] = Loan(splitted_line)
     return loans
 
 
@@ -55,8 +59,22 @@ def loggedin_main_menu(loans):
 
 def show_all_loans(loans):
     loan_columns = ["Loan ID", "First Name", "Middle Name Initial", "Last Name", "Branch Code",
-                    "Gender (F/M)", "Date of Birth (mm/dd/yyyy)", "Loan Amount", "Customer Phone Number", "Pass Code"]
-    print(pandas.DataFrame(data = loans, columns = loan_columns).to_string(index = False).replace(r"\n",""))
+                    "Gender (F/M)", "Date of Birth (mm/dd/yyyy)", "Loan Amount", "Customer Phone Number", "Password"]
+    full_loan_list = []
+    for person in loans.values():
+        loan_list = []
+        loan_list.append(person.loan_id)
+        loan_list.append(person.first_name)
+        loan_list.append(person.middle_name_initial)
+        loan_list.append(person.last_name)
+        loan_list.append(person.branch_code)
+        loan_list.append(person.gender)
+        loan_list.append(person.date_of_birth)
+        loan_list.append(person.loan_amount)
+        loan_list.append(person.phone_number)
+        loan_list.append(person.password.replace("\n", ""))
+        full_loan_list.append(loan_list)
+    print(pandas.DataFrame(data = full_loan_list, columns = loan_columns).to_string(index = False).replace(r"\n",""))
     print("Back to login menu,,,")
     main()
 
@@ -68,33 +86,34 @@ def show_branch_code_loans(loans):
         show_branch_code_loans(loans)
     else:
         print("These are the loans of branch " + branch_code_option)
-        for loan in loans:
-            if loan[4] == branch_code_option:
-                print("Loan {} for customer {} {}. {}.".format(loan[0], loan[1], loan[2], loan[3]))
+        for loan in loans.values():
+            if loan.branch_code == branch_code_option:
+                print("Loan {} for customer {} {}. {}.".format(loan.loan_id, loan.first_name, loan.middle_name_initial,
+                                                               loan.last_name))
         print("Going back to login menu...")
         main()
 
 def query_loan_id(loans):
     loan_id_option = input("Enter the loan ID you wish to query:\n")
     possible_options = []
-    for loan in loans:
-        possible_options.append(loan[0])
+    for loan in loans.values():
+        possible_options.append(loan.loan_id)
     if loan_id_option not in possible_options:
         print("That is not a valid loan ID.")
         query_loan_id(loans)
     else:
-        for loan in loans:
-            if loan_id_option == loan[0]:
-                id_password = loan[9].encode().decode('unicode-escape')
+        for loan in loans.values():
+            if loan_id_option == loan.loan_id:
+                id_password = loan.password.encode().decode('unicode-escape')
                 id_password = id_password[:-1]
-                first_name = loan[1]
-                middle_name_initial = loan[2]
-                last_name = loan[3]
-                branch_code = loan[4]
-                gender = loan[5]
-                date_of_birth = loan[6]
-                loan_amount = loan[7]
-                phone_number = loan[8]
+                first_name = loan.first_name
+                middle_name_initial = loan.middle_name_initial
+                last_name = loan.last_name
+                branch_code = loan.branch_code
+                gender = loan.gender
+                date_of_birth = loan.date_of_birth
+                loan_amount = loan.loan_amount
+                phone_number = loan.phone_number
         random_generations = rng_checker(id_password)
         sorted_random_generations = sorted(random_generations)
 
@@ -118,15 +137,14 @@ def query_loan_id(loans):
         print("Pass code accepted.")
         print("Here is the information of {}:".format(loan_id_option))
         print("-----------------------------------")
-        print("Customer Name: {} {}. {}".format(first_name, middle_name_initial, last_name))
-        print("Branch Code: {}".format(branch_code))
-        print("Gender: {}".format(gender))
-        print("Date of Birth: {}".format(date_of_birth))
-        print("Loan Amount: £{}".format(loan_amount))
-        print("Phone Number: {}".format(phone_number))
+        print("Customer Name: {} {}. {}".format(loan.first_name, loan.middle_name_initial, loan.last_name))
+        print("Branch Code: {}".format(loan.branch_code))
+        print("Gender: {}".format(loan.gender))
+        print("Date of Birth: {}".format(loan.date_of_birth))
+        print("Loan Amount: £{}".format(loan.loan_amount))
+        print("Phone Number: {}".format(loan.phone_number))
         print("Back to login menu,,,")
         main()
-
 
 def rng_checker(id_password):
     random_generations = set()
@@ -151,29 +169,29 @@ def branch_information(loans):
     branch_4_counter = 0
     branch_4_male = 0
 
-    for loan in loans:
-        if loan[4] == "1":
+    for loan in loans.values():
+        if loan.branch_code == "1":
             branch_1_counter += 1
-            loan_amount_dict['branch 1'] += int(loan[7])
-            if loan[5] == "M":
+            loan_amount_dict['branch 1'] += int(loan.loan_amount)
+            if loan.gender == "M":
                 branch_1_male += 1
 
-        if loan[4] == "2":
+        if loan.branch_code == "2":
             branch_2_counter += 1
-            loan_amount_dict['branch 2'] += int(loan[7])
-            if loan[5] == "M":
+            loan_amount_dict['branch 2'] += int(loan.loan_amount)
+            if loan.gender == "M":
                 branch_2_male += 1
 
-        if loan[4] == "3":
+        if loan.branch_code == "3":
             branch_3_counter += 1
-            loan_amount_dict['branch 3'] += int(loan[7])
-            if loan[5] == "M":
+            loan_amount_dict['branch 3'] += int(loan.loan_amount)
+            if loan.gender == "M":
                 branch_3_male += 1
 
-        if loan[4] == "4":
+        if loan.branch_code == "4":
             branch_4_counter += 1
-            loan_amount_dict['branch 4'] += int(loan[7])
-            if loan[5] == "M":
+            loan_amount_dict['branch 4'] += int(loan.loan_amount)
+            if loan.gender == "M":
                 branch_4_male += 1
 
     branch_1_female = branch_1_counter - branch_1_male
@@ -221,19 +239,21 @@ def branch_information(loans):
     print("The percentage of female clients that applied for a loan is {:0.2f}%.\n".format(branch_4_female_percentage))
     print("Back to login menu...")
     main()
+
 def show_birthdays(loans):
     current_month = datetime.now().month
-    for loan in loans:
-        client_dob = datetime.strptime(loan[6], '%m/%d/%Y')
+    for loan in loans.values():
+        client_dob = datetime.strptime(loan.date_of_birth, '%m/%d/%Y')
         if current_month == client_dob.month:
-            customer_birthday_first_names = loan[1]
-            customer_birthday_middle_names = loan[2]
-            customer_birthday_last_names = loan[3]
-            customer_birthday_dob = loan[6]
+            customer_birthday_first_names = loan.first_name
+            customer_birthday_middle_names = loan.middle_name_initial
+            customer_birthday_last_names = loan.last_name
+            customer_birthday_dob = loan.date_of_birth
             print("{} {}. {} with date of birth: {}".format(customer_birthday_first_names,
                   customer_birthday_middle_names, customer_birthday_last_names, customer_birthday_dob))
     print("Back to login menu...")
     main()
+
 def main():
     login()
     print("Reading CSV file:\n")
