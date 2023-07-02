@@ -1,10 +1,8 @@
-import os
 import pandas
 import random
-import ast
 from datetime import datetime
 
-from working_with_files.loan_oop import Loan
+from banking_app.loan_oop import Loan
 
 
 # Define login function
@@ -27,8 +25,7 @@ def login():
 
 
 def reading_data():
-    data = open("C:\\Users\\oscar\\OneDrive\\Documents\\100daysofcode\\100daysofcode\\working_with_files\\data_project"
-                "\\customermortgage.csv", "r")
+    data = open("/banking_app/loan_data/customermortgage.csv", "r")
     loans = {}
     for line in data.readlines():
         splitted_line = line.split(",")
