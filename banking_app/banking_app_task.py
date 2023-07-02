@@ -1,13 +1,17 @@
 import pandas
 import random
+import configparser
 from datetime import datetime
 
 from banking_app.loan_oop import Loan
 
+config = configparser.ConfigParser()
+config.read('C:\\Users\\oscar\\OneDrive\\Documents\\100daysofcode\\100daysofcode\\banking_app\\configs\\configs.ini')
+
 
 # Define login function
 def login():
-    password = "test"
+    password = config.get('DEFAULT', 'password')
     login_option = input("Enter one of 2 options:\n 1. Login\n 2. Quit\n")
     if login_option == "1":
         password_entry = input("Enter the password:\n")
@@ -25,7 +29,7 @@ def login():
 
 
 def reading_data():
-    data = open("/banking_app/loan_data/customermortgage.csv", "r")
+    data = open(config.get('DEFAULT', 'loan_file_location'), "r")
     loans = {}
     for line in data.readlines():
         splitted_line = line.split(",")
