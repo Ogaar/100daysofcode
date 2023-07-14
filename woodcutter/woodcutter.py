@@ -22,6 +22,7 @@ def cut(tree_path):
 
 
     while found_tree == False:
+        num_of_logs = count_logs()
         screen = np.array(ImageGrab.grab(bbox=(0, 0, screen_width, screen_height)))
         screen = cv2.cvtColor(screen, cv2.COLOR_BGR2GRAY)
         # Apply shape detection algorithms (example: circle detection using Hough Transform)
@@ -34,28 +35,58 @@ def cut(tree_path):
             param2=30,
             minRadius=50,
             maxRadius=100)
-        print(found_tree)
-        print(circles)
+        circles = np.uint16(np.around(circles))
+        circles = organise_array(circles[0])
         if circles is not None:
             # Iterate over detected circles
-            for circle in circles[0, :]:
-                # bezier_curve_movement.move_mouse_to_point_with_offset(circle)
+            location_x = []
+            location_y = []
+            for circle in circles:
                 mouse.move(circle[0], circle[1])
-                tree_image = pyautogui.locateOnScreen(tree_path, grayscale=True, confidence=.45)
-                pyautogui.sleep(3)
-                if tree_image:
-                    print("found tree")
-                    found_tree = True
-                if found_tree:
-                    print("Cutting...")
-                    pyautogui.click()
-                    continue
-            continue
+                if pyautogui.locateOnScreen(tree_path, grayscale=True, confidence=.85):
+                    print("Breaking...")
+                    x = circle[0]
+                    y = circle[1]
+                    location_x.append(x)
+                    location_y.append(y)
+                    break
+            mouse.move(x, y)
+            print("Cutting...")
+            pyautogui.click()
+            while num_of_logs == count_logs():
+                pass
+
+
+
+def organise_array(circles):
+    distances = np.sqrt((circles[:, 0] - 960)**2 + (circles[:, 1] - 540)**2)
+    sorted_indices = np.argsort(distances)
+    sorted_circles = circles[sorted_indices]
+    return sorted_circles
+
+def count_logs():
+    image_path = "C:\\Users\\oscar\\OneDrive\\Documents\\100daysofcode\\100daysofcode\\woodcutter\\" \
+                            "resources\\inventory_logs.PNG"
+    inventory = np.array(ImageGrab.grab(bbox=(1689, 738, 1873, 994)))
+    inventory_gray = cv2.cvtColor(inventory, cv2.COLOR_RGB2GRAY)
+    image = cv2.imread(image_path, 0)
+    result = cv2.matchTemplate(inventory_gray, image, cv2.TM_CCOEFF_NORMED)
+
+    # Set a threshold for matches
+    threshold = 0.8
+    matches = np.where(result >= threshold)
+
+    # Count the number of matches
+    count = len(matches[0])
+
+    return count
+
 
 def main():
     not_cutting = True
     while True:
         cut(chop_down_tree_message_path)
+
 
 main()
 
