@@ -13,6 +13,8 @@ import numpy as np
 
 # Required images
 chop_down_tree_message_path = "C:\\Users\\oscar\\OneDrive\\Desktop\\test\\choptreemessage.png"
+chop_down_oak_message_path = "C:\\Users\\oscar\\OneDrive\\Documents\\100daysofcode\\100daysofcode\\woodcutter\\" \
+                             "resources\\chopoakmessage.png"
 
 # Define the screen capture dimensions
 screen_width, screen_height = 1920, 1080  # Modify these values according to your screen resolution
@@ -26,36 +28,9 @@ def cut(tree_path):
     location_y = []
     while found_tree == False:
         num_of_logs = count_logs()
-        if num_of_logs == 28:
+        if num_of_logs >= 26:
             drop_logs()
-        screen = np.array(ImageGrab.grab(bbox=(0, 0, screen_width, screen_height)))
-        screen = cv2.cvtColor(screen, cv2.COLOR_BGR2GRAY)
-        # Apply shape detection algorithms (example: circle detection using Hough Transform)
-        circles = cv2.HoughCircles(
-            screen,
-            cv2.HOUGH_GRADIENT,
-            dp=1,
-            minDist=150,
-            param1=50,
-            param2=25,
-            minRadius=45,
-            maxRadius=100)
-        circles = np.uint16(np.around(circles))
-        circles = organise_array(circles[0])
-        if circles is not None:
-            # Iterate over detected circles
-
-            for circle in circles:
-                mouse.move(circle[0], circle[1])
-                x = circle[0]
-                y = circle[1]
-                location_x.append(x)
-                location_y.append(y)
-                if pyautogui.locateOnScreen(tree_path, grayscale=True, confidence=.9):
-                    print("Breaking...")
-                    break
-            mouse.move(location_x[-2],location_y[-2])
-            pyautogui.sleep(.5)
+        if pyautogui.locateOnScreen(tree_path, grayscale=True, confidence=.9):
             print("Cutting...")
             pyautogui.click()
             num_of_logs = count_logs()
@@ -64,6 +39,41 @@ def cut(tree_path):
                 if time.time() - current_time > 15:
                     break
                 pass
+        else:
+            screen = np.array(ImageGrab.grab(bbox=(0, 0, screen_width, screen_height)))
+            screen = cv2.cvtColor(screen, cv2.COLOR_BGR2GRAY)
+            # Apply shape detection algorithms (example: circle detection using Hough Transform)
+            circles = cv2.HoughCircles(
+                screen,
+                cv2.HOUGH_GRADIENT,
+                dp=1,
+                minDist=150,
+                param1=50,
+                param2=25,
+                minRadius=45,
+                maxRadius=100)
+            circles = np.uint16(np.around(circles))
+            circles = organise_array(circles[0])
+            if circles is not None:
+                # Iterate over detected circles
+
+                for circle in circles:
+                    mouse.move(circle[0], circle[1])
+                    location_x.append(circle[0])
+                    location_y.append(circle[1])
+                    if pyautogui.locateOnScreen(tree_path, grayscale=True, confidence=.9):
+                        print("Breaking...")
+                        break
+                mouse.move(location_x[-2],location_y[-2])
+                pyautogui.sleep(.5)
+                print("Cutting...")
+                pyautogui.click()
+                num_of_logs = count_logs()
+                current_time = time.time()
+                while num_of_logs == count_logs():
+                    if time.time() - current_time > 15:
+                        break
+                    pass
 
 
 
@@ -107,7 +117,7 @@ def drop_logs():
     y_list = list(matches[0])
     x_list = list(matches[1])
     for i in range(0, len(x_list)):
-        mouse.move(x_list[i] + 1873, y_list[i] + 994)
+        mouse.move(x_list[i] + 1700, y_list[i] + 745)
         pyautogui.sleep(.8)
         pyautogui.click()
     pyautogui.keyUp('shift')
@@ -117,9 +127,12 @@ def drop_logs():
 
 
 def main():
-    not_cutting = True
-    while True:
-        cut(chop_down_tree_message_path)
+    tree_choice = input("What type of tree would you like to cut? (Normal/Oak)\n").lower()
+    if tree_choice == "oak":
+        tree_path = chop_down_oak_message_path
+    elif tree_choice == "normal":
+        tree_path = chop_down_tree_message_path
+    cut(tree_path)
 
 
 main()
