@@ -2,7 +2,9 @@ import configparser
 import pandas as pd
 class Extractor:
     def __init__(self, extract_format):
-        self.extract_format = extract_format
+        if extract_format.lower() not in ["csv", "excel", "html", "sql"]:
+            raise Exception("That is not a valid extract format.")
+        self.extract_format = extract_format.lower()
         print("Extractor initialised.")
 
     def extract(self):
