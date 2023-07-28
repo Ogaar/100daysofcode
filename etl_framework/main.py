@@ -4,6 +4,5 @@ from loader import Loader
 extractor = Extractor("csv")
 extracted_file = extractor.extract()
 
-
-loader = Loader("excel")
+loader = Loader("sqlite")
 loader.load(extracted_file)
