@@ -1,8 +1,11 @@
 import configparser
 import pandas as pd
+import sqlite3
+from sqlite3 import Error
+
 class Extractor:
     def __init__(self, extract_format):
-        if extract_format.lower() not in ["csv", "excel", "html", "sql"]:
+        if extract_format.lower() not in ["csv", "excel", "html", "sqlite"]:
             raise Exception("That is not a valid extract format.")
         self.extract_format = extract_format.lower()
         print("Extractor initialised.")
@@ -15,8 +18,8 @@ class Extractor:
                     '\\extractor_configs.ini')
         if self.extract_format == "csv":
             extracted_file = self.__csv_extract(config)
-        # elif extract_format == "sql":
-        #
+        elif self.extract_format == "sqlite":
+            extracted_file = self.__sqlite_extract(config)
         # elif extract_format == "excel":
         #
         # elif extract_format == "html":
@@ -31,3 +34,26 @@ class Extractor:
         except Exception as e:
             print("Error while reading file: check configs")
             print("Exception: " + str(e))
+
+    def __sqlite_extract(self, config):
+        sqlite_file = config.get('SQLITE', 'database_location')
+        table_name = config.get('SQLITE', 'table_name')
+        conn = self.__create_sql_connection(sqlite_file)
+        print("Database connection created.")
+        df = pd.read_sql_query("SELECT * FROM " + table_name, conn)
+        conn.commit()
+        print("Closing connection...")
+        conn.close()
+        return df
+
+
+    def __create_sql_connection(self, db_file):
+        print("Creating database connection...")
+        conn = None
+        try:
+            conn = sqlite3.connect(db_file)
+            return conn
+        except Error as e:
+            print(e)
+
+
