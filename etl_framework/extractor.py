@@ -5,7 +5,7 @@ from sqlite3 import Error
 
 class Extractor:
     def __init__(self, extract_format):
-        if extract_format.lower() not in ["csv", "excel", "html", "sqlite"]:
+        if extract_format.lower() not in ["csv", "excel", "sqlite"]:
             raise Exception("That is not a valid extract format.")
         self.extract_format = extract_format.lower()
         print("Extractor initialised.")
@@ -20,9 +20,8 @@ class Extractor:
             extracted_file = self.__csv_extract(config)
         elif self.extract_format == "sqlite":
             extracted_file = self.__sqlite_extract(config)
-        # elif extract_format == "excel":
-        #
-        # elif extract_format == "html":
+        elif self.extract_format == "excel":
+            extracted_file = self.__excel_extract(config)
 
         return extracted_file
 
@@ -56,4 +55,12 @@ class Extractor:
         except Error as e:
             print(e)
 
+    def __excel_extract(self, config):
+        excel_file = config.get('EXCEL', 'file_name_location')
+        try:
+            df = pd.read_excel(excel_file)
+            return df
+        except Exception as e:
+            print("Error while reading file: check configs")
+            print("Exception: " + str(e))
 
