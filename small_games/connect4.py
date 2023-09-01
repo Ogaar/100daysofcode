@@ -22,60 +22,37 @@ def get_integer_input(question):
             print("Your input is not an integer. Try again.")
 
 def play_connect4(grid):
-    four_in_a_row = False
-    while four_in_a_row == False:
+    i = 0
+    while True:
+        if i % 2 == 0:
+            match = "O"
+        else:
+            match = "X"
         print_grid(grid)
-        circle = get_integer_input("Which column would you like to drop your circle into? ")
-        grid = fill_in_grid_circle(circle, grid)
+        circle = get_integer_input("Which column would you like to drop your {} into? ".format(match))
+        grid = fill_in_grid(match, circle, grid)
         won_game = check_win_condition(grid)
+        i += 1
         if won_game == True:
-            print("Team Circle has won!")
+            print("Team {} has won!".format(match))
             print_grid(grid)
             exit()
 
-        print_grid(grid)
-        cross = get_integer_input("Which column would you like to drop your cross into? ")
-        grid = fill_in_grid_cross(cross, grid)
-        won_game = check_win_condition(grid)
-        if won_game == True:
-            print("Team Cross has won!")
-            print_grid(grid)
-            exit()
-
-def fill_in_grid_circle(column, grid):
+def fill_in_grid(match, column, grid):
     invalid_input = True
-    while invalid_input == True:
+    while invalid_input:
         try:
             if grid[0][column - 1] == "O" or grid[0][column - 1] == "X":
                 column = get_integer_input("The column is full. Try another column: ")
             else:
                 invalid_input = False
         except Exception:
-            column = get_integer_input("There is a problem with your input. Which column would you like to drop your"
-                                       " circle into? ")
+            column = get_integer_input("There is a problem with your input. Which column would you like to drop your "
+                                       "{} into? ".format(match))
 
     for row in reversed(grid):
         if row[column - 1] == ".":
-            row[column - 1] = "O"
-            break
-
-    return grid
-
-def fill_in_grid_cross(column, grid):
-    invalid_input = True
-    while invalid_input == True:
-        try:
-            if grid[0][column - 1] == "O" or grid[0][column - 1] == "X":
-                column = get_integer_input("The column is full. Try another column: ")
-            else:
-                invalid_input = False
-        except Exception:
-            column = get_integer_input("There is a problem with your input. Which column would you like to drop your"
-                                       " cross into? ")
-
-    for row in reversed(grid):
-        if row[column - 1] == ".":
-            row[column - 1] = "X"
+            row[column - 1] = match
             break
 
     return grid
@@ -94,7 +71,6 @@ def check_win_condition(grid):
             if grid[row][col] == grid[row + 1][col] == grid[row + 2][col] == grid[row + 3][col] != ".": # Check for
                 # each column and rows 1-4 that there is a match not equal to an empty cell vertically
                 return True # If there is, return a win
-
 
     for row in range(len(grid) - 3): # Iterate through indexes/rows 1-4 because any later rows you can't have
         # 4-in-a-row diagonally
@@ -115,12 +91,6 @@ def check_win_condition(grid):
         exit()
 
     return False # If no conditions filled, the game continues
-
-
-
-
-
-
 
 def main():
     grid = make_a_grid()
