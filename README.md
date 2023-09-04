@@ -1,5 +1,5 @@
 # 100daysofcode
-This repository contains all my progress in 100 days of learning to code.
+This repository contains all my progress in 100 days of learning to code on Python.
   - banking app: small application to manage and display loan accounts.
   - hangman: working hangman app
   - general learning: folder used to contain small programs for learning python concepts
